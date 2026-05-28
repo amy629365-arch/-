@@ -22,40 +22,40 @@ st.metric("相关系数", f"{corr:.3f}")
 model = LinearRegression()
 model.fit(df[['经济']], df['刑事案件数'])
 
-# 输入框：年份 + 经济数据
+# 输入框
 col1, col2 = st.columns(2)
 with col1:
     year = st.number_input("请输入要预测的年份", min_value=2023, max_value=2035, value=2023, step=1)
 with col2:
-    economy = st.number_input("请输入该年份的经济数据（亿元）", value=35364)
+    economy = st.number_input("请输入该年份的经济数据（亿元）", value=35364.0)
 
-# 预测按钮
 if st.button("开始预测"):
     pred = model.predict([[economy]])[0]
-    st.success(f"预测{year}年刑事案件数：{int(pred):,} 起")
     
-    # 画图
+    year_int = int(year)
+    
+    st.success(f"预测{year_int}年刑事案件数：{int(pred):,} 起")
+    
     fig, ax = plt.subplots(figsize=(10, 5))
     
-    # 历史数据（蓝线）
+    # 历史数据
     ax.plot(df['年份'], df['刑事案件数'], 'b-o', linewidth=2, markersize=8, label='历史数据')
     
     # 预测点（红点）
-    ax.scatter(year, pred, color='red', s=150, zorder=5, label=f'预测{year}年: {int(pred):,}', marker='★')
+    ax.scatter(year_int, pred, color='red', s=150, zorder=5, label=f'预测{year_int}年: {int(pred):,}', marker='o')
     
-    # 添加虚线连接（从最后一个历史点到预测点）
+    # 虚线
     last_year = df['年份'].iloc[-1]
     last_crime = df['刑事案件数'].iloc[-1]
-    ax.plot([last_year, year], [last_crime, pred], 'r--', alpha=0.5, linewidth=1.5)
+    ax.plot([last_year, year_int], [last_crime, pred], 'r--', alpha=0.5, linewidth=1.5)
     
     ax.set_xlabel('年份', fontsize=12)
     ax.set_ylabel('刑事案件数', fontsize=12)
     ax.set_title('刑事案件变化趋势与预测', fontsize=14)
     ax.legend(loc='best')
     ax.grid(True, alpha=0.3)
-    ax.set_xticks(list(range(2012, int(year)+2, 2)))
+    ax.set_xticks(list(range(2012, year_int + 2, 2)))
     
     st.pyplot(fig)
     
-    # 显示预测说明
-    st.caption(f"📊 基于{year}年经济数据 {economy} 亿元，预测刑事案件数为 {int(pred):,} 起")
+    st.caption(f"📊 基于{year_int}年经济数据 {economy:,.0f} 亿元，预测刑事案件数为 {int(pred):,} 起")
